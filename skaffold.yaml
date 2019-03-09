@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/springlabs-svc/mo-test-deleteme-public:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/springlabs-svc/mo-test-deleteme-public:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: mo-test-deleteme-public
+        chartPath: charts/mo-test-deleteme-public
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/springlabs-svc/mo-test-deleteme-public'
+          image.tag: '{{.DIGEST_HEX}}'
